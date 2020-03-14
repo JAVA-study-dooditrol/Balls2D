@@ -16,7 +16,7 @@ public class Main extends Application{
     @Override
     public void start(Stage stage) {
          
-        Text text = new Text("Hello from \"Moving balls in 2D\"!");
+        Text text = new Text("Welcome in \"Moving balls in 2D\"!");
         text.setLayoutY(80);
         text.setLayoutX(100);
          
