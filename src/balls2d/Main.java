@@ -3,30 +3,47 @@ package balls2d;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.Group;
-import javafx.scene.text.Text;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+
+//import java.net.URL;
 
 public class Main extends Application{
     
     public static void main(String[] args) {
         
+        System.out.println("Launching Application");
         Application.launch(args);
+    }
+     
+    @Override
+    public void init() throws Exception {
+         
+        System.out.println("Application inits");
+        super.init();
     }
     
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
          
-        Text text = new Text("Welcome in \"Moving balls in 2D\"!");
-        text.setLayoutY(80);
-        text.setLayoutX(100);
-         
-        Group group = new Group(text);
-         
-        Scene scene = new Scene(group);
+        System.out.println("Application starts");
+        
+        Parent root = FXMLLoader.load(getClass().getResource("..\\res\\Main.fxml"));
+        Scene scene = new Scene(root);
+        
         stage.setScene(scene);
-        stage.setTitle("First Application");
-        stage.setWidth(300);
-        stage.setHeight(250);
+        
+        stage.setTitle("Moving balls in 2D");
+        //stage.setWidth(800);
+        //stage.setHeight(600);
         stage.show();
+    }
+    
+    @Override
+    public void stop() throws Exception {
+         
+        System.out.println("Application stops");
+        super.stop();
     }
 }

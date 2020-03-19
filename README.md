@@ -1,1 +1,1 @@
-The game "Moving balls in 2D". Used JavaFX SDK.
+The game "Moving balls in 2D". Used JavaFX SDK and Eclipse.
