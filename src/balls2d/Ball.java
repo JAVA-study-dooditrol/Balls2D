@@ -8,6 +8,7 @@ public class Ball {
     
     private static double radius;
     private static double friction;
+    private static double recoveryRatio;
     
     private Point2D coords;
     private Point2D velocity;
@@ -15,8 +16,9 @@ public class Ball {
     private Color color;
     
     static {
-        radius = 0;
-        friction = 0;
+        radius = 20;
+        friction = 0.03;
+        recoveryRatio = 1;
     }
     
     {
@@ -66,7 +68,7 @@ public class Ball {
         this.selected = select;
     }
 
-    public boolean getSelected() {
+    public boolean isSelected() {
         
         return selected;
     }
@@ -140,11 +142,29 @@ public class Ball {
         else {            
             double offsetDistance = (2 * radius - distance) / 2 + 1;
             Point2D offsetA = a.getCoords().subtract(b.getCoords()).normalize().multiply(offsetDistance);
-            Point2D offsetB = b.getCoords().subtract(a.getCoords()).normalize().multiply(offsetDistance);
             a.setCoords(a.getCoords().add(offsetA));
-            b.setCoords(b.getCoords().add(offsetB));
+            b.setCoords(b.getCoords().subtract(offsetA));
         }
     }
-    
-    
+
+    public static void collisionUpdate(Ball a, Ball b) {
+        
+        Point2D v1 = a.getVelocity();
+        Point2D v2 = b.getVelocity();
+        Point2D interactionVector = a.getCoords().subtract(b.getCoords()).normalize();
+        double v1p = v1.dotProduct(interactionVector);
+        double v2p = v2.dotProduct(interactionVector);
+        
+        double newV1p = ((1 - recoveryRatio) * v1p + (1 + recoveryRatio) * v2p) / 2;
+        double newV2p = ((1 - recoveryRatio) * v2p + (1 + recoveryRatio) * v1p) / 2;
+        
+        a.setVelocity(v1.add(interactionVector.multiply(newV1p - v1p)));
+        b.setVelocity(v2.add(interactionVector.multiply(newV2p - v2p)));
+
+        double distance = a.getCoords().distance(b.getCoords());
+        double offsetDistance = (2 * radius - distance) / 2;
+        Point2D offsetA = a.getCoords().subtract(b.getCoords()).normalize().multiply(offsetDistance);
+        a.setCoords(a.getCoords().add(offsetA));
+        b.setCoords(b.getCoords().subtract(offsetA));
+    }
 }

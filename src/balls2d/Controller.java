@@ -3,10 +3,8 @@ package balls2d;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Slider;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -24,30 +22,24 @@ public class Controller implements Initializable{
     private GraphicsContext gc;
     private ArrayList<Ball> balls;
     private Ball centerPoint;
+    private double attractionVelocityValue;
+    
     private AnimationTimer timer;
     
     @FXML private Canvas img;
-    @FXML private Button btn;
-    @FXML private HBox hbox;
-    @FXML private Label label;
-    @FXML private VBox root;
-    
-    @FXML
-    private void start(ActionEvent event) {
-           
-    }
+    @FXML private ToggleButton button1;
+    @FXML private Slider slider;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         
+        attractionVelocityValue = 1;
         centerPoint = new Ball(new Point2D(img.getWidth() / 2, img.getHeight() / 2), Color.GREY);
-        
-        Ball.setRadius(20);
-        Ball.setFriction(0.05);
         balls = new ArrayList<Ball>();
+        
         gc = img.getGraphicsContext2D();
         
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 onUpdate();
@@ -56,70 +48,100 @@ public class Controller implements Initializable{
         timer.start();
     }
     
-    @FXML private void actionOnCanvas(MouseEvent event) {
+    @FXML
+    private void clickButton1(ActionEvent event) {
+        
+        if (button1.isSelected()) {
+            for (Ball iter :balls) {
+                
+                Point2D velocity = centerPoint.getCoords().subtract(iter.getCoords());
+                velocity = velocity.normalize().multiply(attractionVelocityValue);
+                iter.setVelocity(velocity);
+                iter.setSelect(true);
+            }
+            button1.setText("Unselect balls");
+        }
+        else {
+            for (Ball iter :balls) {
+                iter.setSelect(false);
+            }
+            button1.setText("Select all balls");
+        }
+    }
+    
+    @FXML
+    private void clickButton2(ActionEvent event) {
+        
+        attractionVelocityValue = slider.getValue();
+    }
+    
+    @FXML 
+    private void actionOnCanvas(MouseEvent event) {
         
         MouseButton button = event.getButton();
         Point2D mousePosition = new Point2D(event.getX(), event.getY());
         
-        if (button == MouseButton.PRIMARY) {  
-            for (Ball iter : balls) {
+        if (button == MouseButton.PRIMARY)
+            leftClickAction(mousePosition);
+        else if (button == MouseButton.SECONDARY)
+            rightClickAction(mousePosition);
+    }
+    
+    private void leftClickAction(Point2D mousePosition) {
+        
+        for (Ball iter : balls) {
+            
+            if (iter.pointInBall(mousePosition)) {
                 
-                if (iter.pointInBall(mousePosition)) {
-                    
-                    if(iter.getSelected()) {
-                        iter.setSelect(false);
-                    }
-                    else {
-                        Point2D velocity = centerPoint.getCoords().subtract(iter.getCoords());
-                        velocity = velocity.normalize().multiply(0.8);
-                        
-                        iter.setVelocity(velocity);
-                        iter.setSelect(true);
-                    }
-                    return;
+                if(iter.isSelected()) {
+                    iter.setSelect(false);
                 }
-            }
-            
-            Ball newBall = new Ball(mousePosition);
-            balls.add(newBall);
-            correctingCollision();
-        }
-        else if (button == MouseButton.SECONDARY) {
-            
-            centerPoint.setCoords(mousePosition);
-            
-            for (Ball iter :balls) {
-                
-                if (iter.getSelected()) {
-                    Point2D velocity = iter.getCoords().subtract(centerPoint.getCoords());
-                    velocity = velocity.normalize().multiply(0.8);
+                else {
+                    Point2D velocity = centerPoint.getCoords().subtract(iter.getCoords());
+                    velocity = velocity.normalize().multiply(attractionVelocityValue);   
                     iter.setVelocity(velocity);
                     iter.setSelect(true);
                 }
+                return;
             }
         }
-    }
-    
-    private void correctingCollision() {
         
-        boolean collision = (balls.size() == 1) ? false : true;
+        Ball newBall = new Ball(mousePosition);
+        balls.add(newBall);
+        
+        int size = balls.size();
+        boolean collision = (size == 1) ? false : true;
         
         while (collision) {
             
             collision = false;
-            for (Ball iter1 : balls) {
-                for (Ball iter2 : balls) {
+            for (int i = 0 ; i < size; ++i) {
+                for (int j = i + 1; j < size; ++j) {
                     
-                    if (Ball.collision(iter1, iter2) && !iter1.equals(iter2)) {
-                        System.out.println("collision");
+                    if (Ball.collision(balls.get(i), balls.get(j))) {
                         collision = true;
-                        Ball.collisionInAdding(iter1, iter2);
+                        Ball.collisionInAdding(balls.get(i), balls.get(j));
                     }
                 }
             }
         }
     }
     
+    private void rightClickAction(Point2D mousePosition) {
+        
+        centerPoint.setCoords(mousePosition);
+        
+        for (Ball iter :balls) {
+            
+            if (iter.isSelected()) {
+                Point2D velocity = centerPoint.getCoords().subtract(iter.getCoords());
+                velocity = velocity.normalize().multiply(attractionVelocityValue);
+                iter.setVelocity(velocity);
+                iter.setSelect(true);
+            }
+        }
+    }
+        
     private void onUpdate() {
         
         for (Ball iter : balls) {
@@ -130,7 +152,31 @@ public class Controller implements Initializable{
                 iter.setSelect(false);
             }
         }
-        correctingCollision();
+        
+        int size = balls.size();
+        for (int i = 0 ; i < size; ++i) {
+            for (int j = i + 1; j < size; ++j) {
+                
+                if (Ball.collision(balls.get(i), balls.get(j))) {
+                    Ball.collisionUpdate(balls.get(i), balls.get(j));
+                }
+            }
+        }        
+        
+        for (Ball iter :balls) {
+            
+            if (iter.isSelected()) {
+                Point2D velocity = centerPoint.getCoords().subtract(iter.getCoords());
+                velocity = velocity.normalize().multiply(attractionVelocityValue);
+                iter.setVelocity(velocity);
+                iter.setSelect(true);
+            }
+        }
+        
+        draw();
+    }
+    
+    private void draw() {
         
         gc.clearRect(0, 0, img.getWidth(), img.getHeight());
         

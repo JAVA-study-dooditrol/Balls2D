@@ -3,11 +3,8 @@ package balls2d;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-
-//import java.net.URL;
+import javafx.fxml.FXMLLoader;
 
 public class Main extends Application{
     
@@ -35,8 +32,6 @@ public class Main extends Application{
         stage.setScene(scene);
         
         stage.setTitle("Moving balls in 2D");
-        //stage.setWidth(800);
-        //stage.setHeight(600);
         stage.show();
     }
     

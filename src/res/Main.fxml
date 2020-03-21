@@ -2,6 +2,8 @@
  
 <?import java.lang.*?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
@@ -9,13 +11,19 @@
 <?import javafx.scene.canvas.Canvas?>
 
 <VBox fx:id="root" xmlns:fx="http://javafx.com/fxml/1" 
-        fx:controller="balls2d.Controller" alignment="baseline_center"
+        fx:controller="balls2d.Controller" alignment="center_left"
         spacing="10">
-	    <Label fx:id="label" text="TExtgggggggg"/>
-	    <HBox fx:id="hbox" alignment="baseline_center">
-	        <Button text="Start" onAction="#start" fx:id="btn"/>
-	        <Button text="gg"/>
-	    </HBox>
-	    <Canvas fx:id="img" width="800" height="600"
-	           onMouseClicked="#actionOnCanvas"/>
+    <Label text="Left-clicking on an empty spot - creating a new ball."/>
+    <Label text="Left-clicking on an existing ball - it becomes active."/>
+    <Label text="Right-click - change the location of the point of attraction."/>
+    <HBox alignment="center_left" spacing="30">
+        <ToggleButton fx:id="button1" text="Select all balls" onAction="#clickButton1" />
+        <HBox alignment="center_left" spacing="10">
+	        <Label text="Change velocity"/>
+	        <Slider fx:id="slider" min="0.5" max="5" value="1" showTickLabels="true"/>
+	        <Button fx:id="button2" text="Change velocity" onAction="#clickButton2"/>
+        </HBox>
+    </HBox>
+    <Canvas fx:id="img" width="800" height="600"
+           onMouseClicked="#actionOnCanvas"/>
 </VBox>
